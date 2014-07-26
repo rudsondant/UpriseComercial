@@ -8,23 +8,26 @@ import android.os.Message;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 
-public class AccelerometerActivity extends Activity implements AccelerometerListener {
+public class GestureActivity extends Activity {
 	
 	//Atributos de conexão
 	String message[]; //IP e Player, respectivamente
 	Connection connection;
 	Handler handler;
+	//Atributos de controle gestual
+	int lastY = 0, lastDerivate = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_accelerometer);
+		setContentView(R.layout.activity_gesture);
 		// Show the Up button in the action bar.
 		setupActionBar();
 		
@@ -34,8 +37,8 @@ public class AccelerometerActivity extends Activity implements AccelerometerList
 	    
 	    message[0] = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_IP);
 	    message[1] = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_PLAYER);
-        
-        //Gerenciador de threads de conexão
+	    
+	  //Gerenciador de threads de conexão
         handler = new Handler() {           
             public void handleMessage(Message msg) {
             	if (msg.what == 1) {
@@ -58,7 +61,7 @@ public class AccelerometerActivity extends Activity implements AccelerometerList
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.accelerometer, menu);
+		getMenuInflater().inflate(R.menu.gesture, menu);
 		return true;
 	}
 
@@ -80,60 +83,57 @@ public class AccelerometerActivity extends Activity implements AccelerometerList
 	}
 	
 	@Override
-	public void onAccelerationChanged(float x, float y, float z) {
-		// TODO Auto-generated method stub		
+	public boolean onTouchEvent(MotionEvent event) {		
+	    int y = (int)event.getY();
+	    switch (event.getAction()) {
+	        case MotionEvent.ACTION_DOWN:
+	        	lastY = y;	        	
+	        	break;
+	        case MotionEvent.ACTION_MOVE:
+	        	int derivate = Derivate(y);
+	        	
+	        	if(derivate != lastDerivate)
+	        	{
+	        		if(derivate > 0)
+	        			SendCommand("UP");		        	
+		        	if(derivate < 0)		       
+		        		SendCommand("DOWN");
+		        	if(derivate == 0)//PODE SER REMOVIDO?		        		   
+			        	SendCommand("STOP");
+		        	lastDerivate = derivate;
+	        	}
+	        	break;
+	        case MotionEvent.ACTION_UP:	   
+	        	SendCommand("STOP");
+	        	lastY = 0;
+	        	lastDerivate = 0;
+	        
+	    }
+	return false;
 	}
 
-	@Override
-	public void onShake(State estado) {			  	
-		String datagram = "<pong><com>MOVE</com><action>"+ estado +"</action><player>" + message[1] + "</player></pong>";
-		try {	   			
-		   		connection.SendUdp(handler, datagram , 10405, message[0]);	   			
-			} catch (IOException e) {
-				Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}		
+	private int Derivate(int current)
+	{	
+		if(current > lastY)			
+			return -1;
+		else{
+			if(current < lastY)
+				return 1;
+			else
+				return 0;
+		}
 	}
 	
-	@Override
-    public void onResume() {
-            super.onResume();
-             
-            //Check device supported Accelerometer senssor or not
-            if (AccelerometerManager.isSupported(this)) {
-                 
-                //Start Accelerometer Listening
-                AccelerometerManager.startListening(this);
-            }
-    }
-	
-	 @Override
-	    public void onStop() {
-	            super.onStop();
-	             
-	            //Check device supported Accelerometer senssor or not
-	            if (AccelerometerManager.isListening()) {
-	                 
-	                //Start Accelerometer Listening
-	                AccelerometerManager.stopListening();
-	            }
-	            
-	    }
-	     
-	    @Override
-	    public void onDestroy() {
-	        super.onDestroy();
-	         
-	        //Check device supported Accelerometer senssor or not
-	        if (AccelerometerManager.isListening()) {
-	             
-	            //Start Accelerometer Listening
-	            AccelerometerManager.stopListening();
-	        }
-	             
-	    }
-	    
-	    
+	private void SendCommand(String command)
+	{
+		String datagram = "<pong><com>MOVE</com><action>"+ command +"</action><player>" + message[1] + "</player></pong>";
+		try {	   			
+	   		connection.SendUdp(handler, datagram , 10405, message[0]);	   			
+		} catch (IOException e) {
+			Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}	
+	}
 
 }

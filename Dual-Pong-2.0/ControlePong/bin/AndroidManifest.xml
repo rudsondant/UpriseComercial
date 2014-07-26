@@ -41,6 +41,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.prototipo.controlepong.MainActivity" />
         </activity>
+        <activity
+            android:name="com.prototipo.controlepong.GestureActivity"
+            android:label="@string/title_activity_gesture"
+            android:parentActivityName="com.prototipo.controlepong.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.prototipo.controlepong.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

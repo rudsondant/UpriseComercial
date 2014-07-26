@@ -15,16 +15,37 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="33dp"
-        android:text="@string/search" 
-        android:onClick="SearchForServer"/>
+        android:onClick="SearchForServer"
+        android:text="@string/search" />
 
-    <CheckBox
-        android:id="@+id/checkBoxAccelerometer"
-        android:layout_width="wrap_content"
+    <RadioGroup
+        android:id="@+id/radioGroup1"
+        android:checkedButton="@+id/control_radio"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/button_search"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="76dp"
-        android:text="Usar controles gestuais" />
+        android:layout_marginTop="38dp"
+        android:orientation="vertical" >
+
+        <RadioButton
+            android:id="@+id/control_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_control" />
+
+        <RadioButton
+            android:id="@+id/gesture_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_gesture" />
+
+        <RadioButton
+            android:id="@+id/accelerometer_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_accelerometer" />
+
+    </RadioGroup>
 
 </RelativeLayout>

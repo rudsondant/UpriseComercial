@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.Toast;
 import android.content.Intent;
 
@@ -58,13 +59,19 @@ public class MainActivity extends Activity {
                 	Toast.makeText(getApplicationContext(),"Servidor encontrado em: " + remoteIp + " Player: " + playerNumber, Toast.LENGTH_SHORT).show();
                 	
                 	//Chamando a activity do controle (botão ou acelerômetro)
-                	CheckBox check = (CheckBox) findViewById(R.id.checkBoxAccelerometer); 
+                	RadioButton radioGesture = (RadioButton) findViewById(R.id.gesture_radio);
+                	RadioButton radioAccelerometer = (RadioButton) findViewById(R.id.accelerometer_radio); 
                 	Intent intent;
                 	
-                	if(!check.isChecked())
-                	  	intent = new Intent(MainActivity.this, ControleActivity.class);	
-                	else                	
-                		intent = new Intent(MainActivity.this, AccelerometerActivity.class);                	
+                	if(radioGesture.isChecked())
+                	  	intent = new Intent(MainActivity.this, GestureActivity.class);	
+                	else
+                	{
+                		if(radioAccelerometer.isChecked())
+                			intent = new Intent(MainActivity.this, AccelerometerActivity.class);
+                		else
+                			intent = new Intent(MainActivity.this, ControleActivity.class);
+                	}               		                	
                 	
                 	intent.putExtra(EXTRA_MESSAGE_IP, remoteIp);
                 	intent.putExtra(EXTRA_MESSAGE_PLAYER, playerNumber);
