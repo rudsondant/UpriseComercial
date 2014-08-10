@@ -14,7 +14,7 @@ public class AccelerometerManager {
 	 enum state {UP, DOWN, STOP};
 	 
 	 /** Accuracy configuration */
-	 private static float threshold  = 8.5f;
+	 private static float threshold  = 8.5f, sense = 15;
 	 
 	 //Detecção de direção
 	 private static float lastValue = 0;
@@ -93,7 +93,8 @@ public class AccelerometerManager {
 	 private static SensorEventListener sensorEventListener =
 		        new SensorEventListener() {	
 		 
-		        private float x = 0;		
+		        private float x = 0;
+		 
 		        private byte derivate = 0;
 		        
 		        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
@@ -103,12 +104,14 @@ public class AccelerometerManager {
 		            x = (float) event.values[0];
 		            
 		            //Calculando a derivada
-		            if(Math.abs(x) > threshold)
+		            if(Math.abs(x - lastValue) > sense)
 		            {
-		            	if(x > lastValue)		            	
+		            	if(x < lastValue)		            	
 		            		derivate = 1;	  
-		            	else if(x < lastValue)
+		            	else if(x > lastValue)
 		            		derivate = -1;
+		            	else
+		            		derivate = 0;
 		            	
 		            	lastValue = x;
 		            }		            
@@ -116,30 +119,18 @@ public class AccelerometerManager {
 		            //Detectando sentido do movimento
 		            if(derivate > 0 && derivate != lastDerivate)
 		            {
-		            	if(motionPerforming == 0)
-		            	{
-		            		listener.onShake(com.prototipo.controlepong.AccelerometerListener.State.UP);
-		            		motionPerforming = 2;
-		            	}
-		            	else
-		            	{		            		
-		            		motionPerforming--;		            			
-		            	}
+		            	listener.onShake(com.prototipo.controlepong.AccelerometerListener.State.UP);	            	
 		            }		
 		            	
 		            if(derivate < 0 && derivate != lastDerivate)
 		            {
-		            	if(motionPerforming == 0)
-		            	{
-		            		listener.onShake(com.prototipo.controlepong.AccelerometerListener.State.DOWN);
-		            		motionPerforming = 2;
-		            	}
-		            	else
-		            	{		            		
-		            		motionPerforming--;
-		            	}
+		            	listener.onShake(com.prototipo.controlepong.AccelerometerListener.State.DOWN);
 		            }	            
-		            	
+		            
+		            if(derivate == 0 && derivate != lastDerivate)
+		            {
+		            	listener.onShake(com.prototipo.controlepong.AccelerometerListener.State.STOP);
+		            }	
 		        }
 		  
 		    };
